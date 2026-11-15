@@ -1,0 +1,1613 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BOMBEAT — Live Music Agency for Bombay</title>
+    <meta
+      name="description"
+      content="BOMBEAT stage presentation — Live Music Agency for Bombay, powered by Project DRAKE."
+    />
+    <meta property="og:title" content="BOMBEAT — Live Music Agency for Bombay" />
+    <meta
+      property="og:description"
+      content="Live music entertainment for Bombay events. Profitable from Day 1."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,500;9..40,700&family=JetBrains+Mono:wght@500;700&family=Outfit:wght@600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg-black: #050507;
+        --bg-obsidian: #0a0a0e;
+        --bg-panel: rgba(14, 14, 18, 0.8);
+        --gold: #d4af37;
+        --gold-bright: #f5d061;
+        --gold-glow: rgba(245, 208, 97, 0.35);
+        --text-primary: #f7f6f2;
+        --text-secondary: #a8a69e;
+        --text-muted: #6e6c64;
+        --border-subtle: rgba(255, 255, 255, 0.08);
+        --border-gold: rgba(212, 175, 55, 0.42);
+        --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
+        --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+        --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+        --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 100%;
+        min-height: 100%;
+        background-color: var(--bg-black);
+        color: var(--text-primary);
+        font-family: var(--font-body);
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+
+      /* Black & Gold Ambient Stage */
+      .stage-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(62% 52% at 74% 22%, rgba(212, 175, 55, 0.11) 0%, transparent 70%),
+          radial-gradient(48% 40% at 18% 82%, rgba(245, 208, 97, 0.06) 0%, transparent 65%),
+          linear-gradient(180deg, #050507 0%, #09090d 100%);
+      }
+
+      .stage-grid {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(212, 175, 55, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(212, 175, 55, 0.025) 1px, transparent 1px);
+        background-size: 72px 72px;
+        mask-image: radial-gradient(ellipse 85% 75% at 50% 45%, black 30%, transparent 100%);
+      }
+
+      .cue-burst {
+        position: fixed;
+        inset: 0;
+        z-index: 35;
+        pointer-events: none;
+        opacity: 0;
+        background: radial-gradient(circle at 50% 50%, rgba(245, 208, 97, 0.22) 0%, transparent 68%);
+        transform: scale(0.8);
+      }
+
+      .cue-burst.fire {
+        animation: goldBurst 620ms var(--ease-out-expo) forwards;
+      }
+
+      @keyframes goldBurst {
+        0% {
+          opacity: 0.9;
+          transform: scale(0.75);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1.6);
+        }
+      }
+
+      /* Minimal Brand Mark (Revealed from Slide 2 onward) */
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 30;
+        height: 64px;
+        padding: 0 36px;
+        display: flex;
+        align-items: center;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 320ms ease;
+      }
+
+      .topbar.visible {
+        opacity: 1;
+      }
+
+      .brand-lockup {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .brand-wordmark {
+        font-family: var(--font-display);
+        font-size: 1.3rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        background: linear-gradient(135deg, #fff6d1 0%, #d4af37 65%, #b8860b 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      /* Main 16:9 Stage Viewport */
+      .stage-viewport {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        min-height: 100vh;
+        padding: 56px 48px 72px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stage-container {
+        position: relative;
+        width: 100%;
+        max-width: 1380px;
+        min-height: 560px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* TINY In-Place Countdown Number (Appears right where animation drops) */
+      .tiny-countdown {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 40;
+        pointer-events: none;
+        opacity: 0;
+        font-family: var(--font-mono);
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: rgba(245, 208, 97, 0.78);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.04em;
+        transition: opacity 120ms ease;
+      }
+
+      .tiny-countdown.active {
+        opacity: 1;
+      }
+
+      /* Slides */
+      .cue-module {
+        width: 100%;
+        display: none;
+        opacity: 0;
+      }
+
+      .cue-module.active {
+        display: block;
+        opacity: 1;
+      }
+
+      .cue-module.entering .stagger-item {
+        animation: stageDrop 680ms var(--ease-out-expo) backwards;
+        animation-delay: calc(var(--stagger, 0) * 90ms);
+      }
+
+      @keyframes stageDrop {
+        0% {
+          opacity: 0;
+          transform: translateY(26px) scale(0.96);
+          filter: blur(6px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+          filter: blur(0);
+        }
+      }
+
+      .glass-panel {
+        background: var(--bg-panel);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--border-subtle);
+        border-radius: 18px;
+      }
+
+      .glass-panel-gold {
+        background: linear-gradient(155deg, rgba(212, 175, 55, 0.14) 0%, rgba(10, 10, 14, 0.88) 70%);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--border-gold);
+        border-radius: 18px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 32px rgba(212, 175, 55, 0.12);
+      }
+
+      .gold-text {
+        background: linear-gradient(125deg, #fff5cc 0%, #f5d061 45%, #d4af37 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .huge-title {
+        font-family: var(--font-display);
+        font-size: clamp(2.8rem, 4.8vw, 4.7rem);
+        font-weight: 800;
+        line-height: 1.04;
+        letter-spacing: -0.03em;
+        text-wrap: balance;
+      }
+
+      .tabular-num {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* =========================================================
+         SLIDE 1: DULL PARTY PHOTO HOOK
+      ========================================================= */
+      .boring-party-frame {
+        position: relative;
+        width: 100%;
+        height: min(76vh, 660px);
+        border-radius: 22px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: #08080a;
+      }
+
+      .boring-party-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        filter: saturate(0.75) contrast(1.06);
+      }
+
+      .boring-party-scrim {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(5, 5, 7, 0.25) 0%, rgba(5, 5, 7, 0.18) 45%, rgba(5, 5, 7, 0.9) 100%);
+      }
+
+      .boring-party-copy {
+        position: absolute;
+        left: 44px;
+        right: 44px;
+        bottom: 40px;
+      }
+
+      .boring-sub {
+        margin-top: 12px;
+        font-size: clamp(1.15rem, 1.8vw, 1.55rem);
+        font-weight: 500;
+        color: var(--text-secondary);
+      }
+
+      /* =========================================================
+         SLIDE 2: BOMBEAT INTRO + 5s AUTO-PLAY VIDEO
+      ========================================================= */
+      .intro-grid {
+        display: grid;
+        grid-template-columns: 0.95fr 1.05fr;
+        gap: 44px;
+        align-items: center;
+      }
+
+      .intro-tagline {
+        margin-top: 18px;
+        font-size: clamp(1.4rem, 2.3vw, 2.1rem);
+        font-weight: 600;
+        color: var(--text-secondary);
+        line-height: 1.25;
+      }
+
+      .intro-pill {
+        display: inline-block;
+        margin-top: 28px;
+        font-family: var(--font-mono);
+        font-size: 0.92rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: var(--gold-bright);
+      }
+
+      .intro-video-stage {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        width: 100%;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid var(--border-gold);
+        background: #070709;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 36px rgba(212, 175, 55, 0.14);
+      }
+
+      .intro-video-el {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        border: 0;
+      }
+
+      .intro-poster-dim {
+        filter: brightness(0.42);
+      }
+
+      .video-tiny-timer {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        font-family: var(--font-mono);
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: rgba(245, 208, 97, 0.88);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 150ms ease;
+      }
+
+      .video-tiny-timer.active {
+        opacity: 1;
+      }
+
+      .video-playing-fx {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        border: 2px solid transparent;
+        border-radius: 20px;
+        transition: border-color 300ms ease;
+      }
+
+      .video-playing-fx.playing {
+        border-color: var(--gold-bright);
+      }
+
+      /* =========================================================
+         SLIDE 3: HOW IT WORKS (GRAPHICS & BIG TEXT)
+      ========================================================= */
+      .funnel-diagram-wrap {
+        position: relative;
+        margin-top: 42px;
+      }
+
+      .funnel-conduit-svg {
+        position: absolute;
+        top: 50%;
+        left: 6%;
+        width: 88%;
+        height: 40px;
+        transform: translateY(-50%);
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .conduit-flow {
+        stroke: var(--gold-bright);
+        stroke-width: 2.5;
+        stroke-dasharray: 10 14;
+        fill: none;
+        filter: drop-shadow(0 0 8px rgba(245, 208, 97, 0.6));
+        animation: flowDash 1.4s linear infinite;
+      }
+
+      @keyframes flowDash {
+        to {
+          stroke-dashoffset: -48;
+        }
+      }
+
+      .funnel-nodes {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 22px;
+      }
+
+      .funnel-node {
+        padding: 34px 26px;
+        min-height: 290px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+
+      .node-graphic {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        background: rgba(212, 175, 55, 0.12);
+        border: 1px solid rgba(245, 208, 97, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--gold-bright);
+      }
+
+      .node-title {
+        margin-top: 22px;
+        font-family: var(--font-display);
+        font-size: clamp(1.65rem, 2.2vw, 2.15rem);
+        font-weight: 800;
+        line-height: 1.12;
+      }
+
+      .node-tag {
+        margin-top: 14px;
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+
+      /* =========================================================
+         SLIDE 4: 5 WEEKS. OUR GROWTH.
+      ========================================================= */
+      .traction-top-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px;
+        margin-top: 28px;
+      }
+
+      .kpi-card {
+        padding: 28px 34px;
+      }
+
+      .kpi-card-label {
+        font-size: 1.05rem;
+        color: var(--text-secondary);
+      }
+
+      .kpi-card-value {
+        margin-top: 8px;
+        font-family: var(--font-mono);
+        font-size: clamp(2.8rem, 4.5vw, 4.4rem);
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .traction-split {
+        margin-top: 22px;
+        display: grid;
+        grid-template-columns: 1.25fr 0.95fr;
+        gap: 22px;
+        align-items: stretch;
+      }
+
+      .chart-panel {
+        padding: 24px 28px;
+      }
+
+      .chart-svg-wrap {
+        width: 100%;
+        height: 230px;
+      }
+
+      .deals-panel {
+        padding: 22px 26px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      .deal-row {
+        padding: 14px 18px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-subtle);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .deal-row.active {
+        border-color: var(--gold-bright);
+        background: rgba(212, 175, 55, 0.12);
+      }
+
+      .deal-name {
+        font-family: var(--font-display);
+        font-size: 1.2rem;
+        font-weight: 700;
+      }
+
+      .deal-gross {
+        font-family: var(--font-mono);
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--gold-bright);
+      }
+
+      /* =========================================================
+         SLIDE 5: PURE MEDIA STAGE (ADAPTIVE ASPECT RATIOS)
+      ========================================================= */
+      .showcase-wall {
+        display: grid;
+        grid-template-columns: 1.25fr 1fr 1fr;
+        gap: 24px;
+        max-width: 1280px;
+        margin: 0 auto;
+        align-items: center;
+      }
+
+      .showcase-slot {
+        position: relative;
+        width: 100%;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid var(--border-gold);
+        background: #08080b;
+        box-shadow: 0 24px 56px rgba(0, 0, 0, 0.72), 0 0 28px rgba(212, 175, 55, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .showcase-slot.video-slot {
+        aspect-ratio: 16 / 9;
+      }
+
+      .showcase-slot.image-slot {
+        max-height: 62vh;
+      }
+
+      .showcase-media {
+        width: 100%;
+        height: 100%;
+        display: block;
+        border: 0;
+      }
+
+      .showcase-slot.image-slot .showcase-media {
+        width: 100%;
+        height: auto;
+        max-height: 62vh;
+        object-fit: contain;
+      }
+
+      /* =========================================================
+         SLIDE 6: PROJECT DRAKE
+      ========================================================= */
+      .drake-grid {
+        margin-top: 34px;
+        display: grid;
+        grid-template-columns: 0.92fr 1.08fr;
+        gap: 28px;
+        align-items: stretch;
+      }
+
+      .drake-hub-panel {
+        padding: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .neural-svg-box {
+        width: 100%;
+        height: 290px;
+      }
+
+      .neural-node-rect {
+        fill: rgba(14, 14, 18, 0.94);
+        stroke: rgba(255, 255, 255, 0.16);
+        stroke-width: 1.5;
+        transition: stroke 240ms ease, fill 240ms ease;
+      }
+
+      .neural-node-rect.active {
+        fill: rgba(212, 175, 55, 0.16);
+        stroke: var(--gold-bright);
+        filter: drop-shadow(0 0 12px rgba(245, 208, 97, 0.35));
+      }
+
+      .drake-cards {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 16px;
+      }
+
+      .drake-card {
+        padding: 22px 26px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .drake-card-title {
+        font-family: var(--font-display);
+        font-size: clamp(1.35rem, 1.9vw, 1.7rem);
+        font-weight: 700;
+      }
+
+      .drake-card-stat {
+        font-family: var(--font-mono);
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--gold-bright);
+        white-space: nowrap;
+      }
+
+      /* =========================================================
+         SLIDE 7: PRACTICAL USEFUL KNOWLEDGE VS SCHOOL KNOWLEDGE
+      ========================================================= */
+      .vs-stage {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 28px;
+        align-items: center;
+      }
+
+      .vs-card {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .vs-img-box {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #08080a;
+      }
+
+      .vs-img-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .vs-title {
+        font-family: var(--font-display);
+        font-size: clamp(1.65rem, 2.3vw, 2.3rem);
+        font-weight: 800;
+        line-height: 1.1;
+      }
+
+      .vs-badge {
+        width: 82px;
+        height: 82px;
+        border-radius: 999px;
+        border: 2px solid var(--gold-bright);
+        background: radial-gradient(circle, rgba(212, 175, 55, 0.25) 0%, rgba(10, 10, 14, 0.95) 75%);
+        box-shadow: 0 0 36px rgba(245, 208, 97, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-size: 1.85rem;
+        font-weight: 900;
+        color: var(--gold-bright);
+        letter-spacing: 0.04em;
+      }
+
+      /* =========================================================
+         SLIDE 8: CLOSING PERSPECTIVE
+      ========================================================= */
+      .closing-stage {
+        text-align: center;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 36px 20px;
+      }
+
+      .closing-sub {
+        margin-top: 26px;
+        font-family: var(--font-display);
+        font-size: clamp(1.6rem, 2.8vw, 2.6rem);
+        font-weight: 700;
+        line-height: 1.25;
+      }
+
+      .closing-crown {
+        margin: 40px auto 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        opacity: 0.9;
+      }
+
+      /* =========================================================
+         BOTTOM AUDIO WAVE & BOTTOM-LEFT BUTTON
+      ========================================================= */
+      .visualizer-bar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 36px;
+        z-index: 20;
+        pointer-events: none;
+        background: linear-gradient(180deg, transparent 0%, rgba(5, 5, 7, 0.92) 100%);
+      }
+
+      #audioWaveCanvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .bottom-left-trigger {
+        position: fixed;
+        left: 24px;
+        bottom: 20px;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .stage-btn {
+        height: 40px;
+        padding: 0 16px;
+        border-radius: 9px;
+        border: 1px solid rgba(212, 175, 55, 0.45);
+        background: rgba(12, 12, 16, 0.86);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        color: var(--gold-bright);
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.65);
+        transition: transform 150ms var(--ease-out-expo), background 150ms ease, border-color 150ms ease;
+      }
+
+      .stage-btn:hover {
+        transform: translateY(-1px);
+        background: rgba(212, 175, 55, 0.16);
+        border-color: var(--gold-bright);
+      }
+
+      .stage-btn.back {
+        width: 40px;
+        padding: 0;
+        color: var(--text-secondary);
+        border-color: rgba(255, 255, 255, 0.12);
+      }
+
+      .stage-btn.back:hover {
+        color: var(--text-primary);
+        border-color: var(--gold);
+      }
+
+      button:focus-visible {
+        outline: 2px solid var(--gold-bright);
+        outline-offset: 2px;
+      }
+
+      /* Responsive */
+      @media (max-width: 1080px) {
+        .intro-grid,
+        .traction-split,
+        .drake-grid,
+        .vs-stage {
+          grid-template-columns: 1fr;
+        }
+        .vs-badge {
+          margin: 0 auto;
+        }
+        .funnel-nodes {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .funnel-conduit-svg {
+          display: none;
+        }
+        .showcase-slot:nth-child(2) {
+          transform: none;
+        }
+      }
+
+      @media (max-width: 680px) {
+        .stage-viewport {
+          padding: 48px 16px 84px;
+        }
+        .funnel-nodes,
+        .traction-top-row {
+          grid-template-columns: 1fr;
+        }
+        .showcase-wall {
+          grid-template-columns: 1fr;
+          max-width: 560px;
+        }
+        .boring-party-copy {
+          left: 22px;
+          right: 22px;
+          bottom: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage-backdrop" aria-hidden="true"></div>
+    <div class="stage-grid" aria-hidden="true"></div>
+    <div id="cueBurst" class="cue-burst" aria-hidden="true"></div>
+
+    <!-- Top Brand Mark (Hidden on Slide 1 Boring Party Hook, Shown from Slide 2+) -->
+    <header id="topBar" class="topbar">
+      <div class="brand-lockup">
+        <svg width="30" height="26" viewBox="0 0 34 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path
+            d="M3 22L7.5 8L13.5 16L17 4L20.5 16L26.5 8L31 22H3Z"
+            stroke="#F5D061"
+            stroke-width="2.1"
+            stroke-linejoin="round"
+            fill="rgba(212,175,55,0.18)"
+          />
+          <rect x="6" y="25" width="22" height="2.4" rx="1.2" fill="#F7F6F2" />
+          <circle cx="17" cy="4" r="2" fill="#F5D061" />
+        </svg>
+        <span class="brand-wordmark">BOMBEAT</span>
+      </div>
+    </header>
+
+    <main class="stage-viewport">
+      <div class="stage-container">
+        <!-- TINY In-Place Countdown Number (5 -> 0) -->
+        <span id="tinyCountdown" class="tiny-countdown" aria-live="polite">5</span>
+
+        <!-- =======================================================
+             SLIDE 1: DULL BORING PARTY HOOK
+        ======================================================= -->
+        <section id="slide-1" class="cue-module active entering" aria-labelledby="slide1-title">
+          <div class="boring-party-frame stagger-item" style="--stagger: 0">
+            <img
+              class="boring-party-img"
+              src="/src/assets/images/bombeat_dull_party_1794677385486.jpg"
+              alt="Quiet party where guests sit separately looking down at their smartphones"
+              referrerpolicy="no-referrer"
+            />
+            <div class="boring-party-scrim"></div>
+            <div class="boring-party-copy">
+              <h1 id="slide1-title" class="huge-title">Parties Can Be Boring.</h1>
+              <div class="boring-sub">Everyone on their phones. How do you end it?</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =======================================================
+             SLIDE 2: BOMBEAT INTRO + 5s AUTO-PLAY VIDEO
+        ======================================================= -->
+        <section id="slide-2" class="cue-module" aria-labelledby="slide2-title">
+          <div class="intro-grid">
+            <div>
+              <h1 id="slide2-title" class="huge-title stagger-item" style="--stagger: 0">
+                <span class="gold-text">BOMBEAT</span>
+              </h1>
+              <div class="intro-tagline stagger-item" style="--stagger: 1">
+                Live Music Agency for Bombay.
+              </div>
+              <div class="intro-pill stagger-item" style="--stagger: 2">
+                BOMBAY ARTISTS &bull; LAUNCHED OCT 9
+              </div>
+            </div>
+
+            <div class="intro-video-stage stagger-item" style="--stagger: 2">
+              <img
+                id="introPosterImg"
+                class="intro-video-el intro-poster-dim"
+                src="/src/assets/images/bombeat_reel_terrace_1794674249165.jpg"
+                alt="BOMBEAT live artist performance in Mumbai"
+                referrerpolicy="no-referrer"
+              />
+              <iframe
+                id="introYtFrame"
+                class="intro-video-el"
+                style="display: none"
+                title="BOMBEAT Intro"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+              ></iframe>
+              <span id="videoTinyTimer" class="video-tiny-timer">5</span>
+              <div id="videoPlayingFx" class="video-playing-fx"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =======================================================
+             SLIDE 3: HOW THE BUSINESS WORKS (GRAPHICS + HUGE TEXT)
+        ======================================================= -->
+        <section id="slide-3" class="cue-module" aria-labelledby="slide3-title">
+          <h2 id="slide3-title" class="huge-title stagger-item" style="--stagger: 0">
+            How <span class="gold-text">BOMBEAT</span> Works
+          </h2>
+
+          <div class="funnel-diagram-wrap">
+            <svg class="funnel-conduit-svg" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true">
+              <line x1="0" y1="20" x2="1000" y2="20" stroke="rgba(255,255,255,0.12)" stroke-width="2" />
+              <line x1="0" y1="20" x2="1000" y2="20" class="conduit-flow" />
+            </svg>
+
+            <div class="funnel-nodes">
+              <div class="glass-panel funnel-node stagger-item" style="--stagger: 1">
+                <div class="node-graphic" aria-hidden="true">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="2" width="20" height="20" rx="5" />
+                    <circle cx="12" cy="12" r="4" />
+                    <circle cx="17.5" cy="6.5" r="1" fill="currentColor" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="node-title">Meta &amp; IG Ads</h3>
+                  <div class="node-tag">Facebook &amp; Instagram</div>
+                </div>
+              </div>
+
+              <div class="glass-panel funnel-node stagger-item" style="--stagger: 2">
+                <div class="node-graphic" aria-hidden="true">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="node-title">WhatsApp Chat</h3>
+                  <div class="node-tag">Direct Party Hosts</div>
+                </div>
+              </div>
+
+              <div class="glass-panel funnel-node stagger-item" style="--stagger: 3">
+                <div class="node-graphic" aria-hidden="true">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                    <line x1="12" y1="19" x2="12" y2="23" />
+                    <line x1="8" y1="23" x2="16" y2="23" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="node-title">Live Singers</h3>
+                  <div class="node-tag">Bombay Artists Sent</div>
+                </div>
+              </div>
+
+              <div class="glass-panel-gold funnel-node stagger-item" style="--stagger: 4">
+                <div class="node-graphic" aria-hidden="true">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="node-title gold-text">43% Profit</h3>
+                  <div class="node-tag" style="color: var(--gold-bright)">Zero Inventory</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =======================================================
+             SLIDE 4: 5 WEEKS. OUR GROWTH.
+        ======================================================= -->
+        <section id="slide-4" class="cue-module" aria-labelledby="slide4-title">
+          <h2 id="slide4-title" class="huge-title stagger-item" style="--stagger: 0">
+            5 Weeks. <span class="gold-text">Our Growth.</span>
+          </h2>
+
+          <div class="traction-top-row">
+            <div class="glass-panel kpi-card stagger-item" style="--stagger: 1">
+              <div class="kpi-card-label">Gross Revenue</div>
+              <div class="kpi-card-value" id="counterGross">₹0</div>
+            </div>
+
+            <div class="glass-panel-gold kpi-card stagger-item" style="--stagger: 2">
+              <div class="kpi-card-label">Net Profit (43%)</div>
+              <div class="kpi-card-value gold-text" id="counterNet">₹0</div>
+            </div>
+          </div>
+
+          <div class="traction-split">
+            <div class="glass-panel chart-panel stagger-item" style="--stagger: 3">
+              <div class="chart-svg-wrap">
+                <svg id="tractionChartSvg" viewBox="0 0 640 230" width="100%" height="100%" role="img" aria-label="Sales growth chart"></svg>
+              </div>
+            </div>
+
+            <div class="glass-panel deals-panel stagger-item" style="--stagger: 4">
+              <div class="deal-row" data-deal-idx="0">
+                <div class="deal-name">Gig #1</div>
+                <div class="deal-gross">₹2,000</div>
+              </div>
+              <div class="deal-row active" data-deal-idx="1">
+                <div class="deal-name">Gig #2</div>
+                <div class="deal-gross">₹17,500</div>
+              </div>
+              <div class="deal-row" data-deal-idx="2">
+                <div class="deal-name">Gig #3</div>
+                <div class="deal-gross">₹10,000</div>
+              </div>
+              <div class="deal-row" data-deal-idx="3">
+                <div class="deal-name">Gig #4</div>
+                <div class="deal-gross">₹6,000</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =======================================================
+             SLIDE 5: PURE MEDIA SHOWCASE (NO "CREATIVES" OR "VIDEOS" TEXT)
+        ======================================================= -->
+        <section id="slide-5" class="cue-module" aria-label="Showcase">
+          <div class="showcase-wall">
+            <div class="showcase-slot video-slot stagger-item" style="--stagger: 0" data-slot="0">
+              <iframe
+                id="showcaseYtFrame"
+                class="showcase-media"
+                title="BOMBEAT Live Showcase"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+              ></iframe>
+            </div>
+
+            <div class="showcase-slot image-slot stagger-item" style="--stagger: 1" data-slot="1">
+              <img
+                class="showcase-media"
+                src="https://i.ibb.co/spg3XQQ7/image-9.png"
+                alt="BOMBEAT showcase visual 2"
+                referrerpolicy="no-referrer"
+              />
+            </div>
+
+            <div class="showcase-slot image-slot stagger-item" style="--stagger: 2" data-slot="2">
+              <img
+                class="showcase-media"
+                src="https://i.ibb.co/5WBS7gQz/image-8.png"
+                alt="BOMBEAT showcase visual 3"
+                referrerpolicy="no-referrer"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- =======================================================
+             SLIDE 6: PROJECT DRAKE — AI ASSISTANT
+        ======================================================= -->
+        <section id="slide-6" class="cue-module" aria-labelledby="slide6-title">
+          <h2 id="slide6-title" class="huge-title stagger-item" style="--stagger: 0">
+            Next: <span class="gold-text">DRAKE</span> Handles It All.
+          </h2>
+
+          <div class="drake-grid">
+            <div class="glass-panel drake-hub-panel stagger-item" style="--stagger: 1">
+              <svg class="neural-svg-box" viewBox="0 0 420 280" aria-label="DRAKE AI Automation Hub">
+                <path d="M 105 46 L 210 140" stroke="rgba(212,175,55,0.45)" stroke-width="1.8" fill="none" />
+                <path d="M 315 46 L 210 140" stroke="rgba(212,175,55,0.45)" stroke-width="1.8" fill="none" />
+                <path d="M 105 234 L 210 140" stroke="rgba(212,175,55,0.45)" stroke-width="1.8" fill="none" />
+                <path d="M 315 234 L 210 140" stroke="rgba(212,175,55,0.45)" stroke-width="1.8" fill="none" />
+
+                <rect x="142" y="108" width="136" height="64" rx="12" class="neural-node-rect active" />
+                <text x="210" y="146" text-anchor="middle" fill="#F5D061" font-family="Outfit, sans-serif" font-size="18" font-weight="800">DRAKE AI</text>
+
+                <rect id="dNode0" x="14" y="18" width="172" height="52" rx="10" class="neural-node-rect" />
+                <text x="100" y="49" text-anchor="middle" fill="#F7F6F2" font-family="DM Sans, sans-serif" font-size="14" font-weight="700">WhatsApp Chats</text>
+
+                <rect id="dNode1" x="234" y="18" width="172" height="52" rx="10" class="neural-node-rect" />
+                <text x="320" y="49" text-anchor="middle" fill="#F7F6F2" font-family="DM Sans, sans-serif" font-size="14" font-weight="700">Artist Matching</text>
+
+                <rect id="dNode2" x="14" y="210" width="172" height="52" rx="10" class="neural-node-rect" />
+                <text x="100" y="241" text-anchor="middle" fill="#F7F6F2" font-family="DM Sans, sans-serif" font-size="14" font-weight="700">Instant Quotes</text>
+
+                <rect id="dNode3" x="234" y="210" width="172" height="52" rx="10" class="neural-node-rect" />
+                <text x="320" y="241" text-anchor="middle" fill="#F7F6F2" font-family="DM Sans, sans-serif" font-size="14" font-weight="700">Auto Payments</text>
+              </svg>
+            </div>
+
+            <div class="drake-cards stagger-item" style="--stagger: 2">
+              <div class="glass-panel-gold drake-card">
+                <div class="drake-card-title">Controls All WhatsApp Chats</div>
+                <div class="drake-card-stat">24/7 AUTO</div>
+              </div>
+              <div class="glass-panel drake-card">
+                <div class="drake-card-title">Closes Bookings Behind My Back</div>
+                <div class="drake-card-stat">ZERO TOUCH</div>
+              </div>
+              <div class="glass-panel drake-card">
+                <div class="drake-card-title">I Focus On New Skills</div>
+                <div class="drake-card-stat">100% FREED</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =======================================================
+             SLIDE 7: PRACTICAL USEFUL KNOWLEDGE VS SCHOOL KNOWLEDGE
+        ======================================================= -->
+        <section id="slide-7" class="cue-module" aria-labelledby="slide7-title">
+          <h2 id="slide7-title" class="sr-only" style="position: absolute; width: 1px; height: 1px; overflow: hidden">
+            Practical Useful Knowledge versus School Knowledge
+          </h2>
+          <div class="vs-stage">
+            <div class="glass-panel-gold vs-card stagger-item" style="--stagger: 0">
+              <div class="vs-img-box">
+                <img
+                  src="/src/assets/images/bombeat_practical_knowledge_1794677386895.jpg"
+                  alt="Gold condenser microphone and glowing business growth bars"
+                  referrerpolicy="no-referrer"
+                />
+              </div>
+              <div class="vs-title gold-text">Practical Useful Knowledge</div>
+            </div>
+
+            <div class="vs-badge stagger-item" style="--stagger: 1">VS</div>
+
+            <div class="glass-panel vs-card stagger-item" style="--stagger: 2">
+              <div class="vs-img-box">
+                <img
+                  src="/src/assets/images/bombeat_school_knowledge_1794677387326.jpg"
+                  alt="Old school chalkboard and worn textbooks"
+                  referrerpolicy="no-referrer"
+                />
+              </div>
+              <div class="vs-title" style="color: var(--text-secondary)">School Knowledge</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =======================================================
+             SLIDE 8: THANK YOU FOR YOUR TIME
+        ======================================================= -->
+        <section id="slide-8" class="cue-module" aria-labelledby="slide8-title">
+          <div class="closing-stage">
+            <h1 id="slide8-title" class="huge-title stagger-item" style="--stagger: 0">
+              Thank You For Giving Me Your Time.
+            </h1>
+            <div class="closing-sub gold-text stagger-item" style="--stagger: 1">
+              If you guys get my perspective, good for you.
+            </div>
+            <div class="closing-crown stagger-item" style="--stagger: 2">
+              <svg width="34" height="30" viewBox="0 0 34 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path
+                  d="M3 22L7.5 8L13.5 16L17 4L20.5 16L26.5 8L31 22H3Z"
+                  stroke="#F5D061"
+                  stroke-width="2.1"
+                  stroke-linejoin="round"
+                  fill="rgba(212,175,55,0.18)"
+                />
+                <rect x="6" y="25" width="22" height="2.4" rx="1.2" fill="#F7F6F2" />
+              </svg>
+              <span class="brand-wordmark">BOMBEAT</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Bottom Gold Audio Visualizer -->
+    <div class="visualizer-bar" aria-hidden="true">
+      <canvas id="audioWaveCanvas"></canvas>
+    </div>
+
+    <!-- Bottom-Left Trigger Button (No Incoming Preview) -->
+    <div class="bottom-left-trigger">
+      <button type="button" id="prevCueBtn" class="stage-btn back" aria-label="Previous">&#8592;</button>
+      <button type="button" id="nextCueBtn" class="stage-btn" aria-label="Next">
+        <span>&#9654;</span>
+        <span id="cueCounterLabel">01 / 08</span>
+      </button>
+    </div>
+
+    <script>
+      (() => {
+        'use strict';
+
+        /* =========================================================
+           DROP YOUR VIDEO LINKS HERE LATER (MP4 / WEBM URLs)
+        ========================================================= */
+        const VIDEO_CONFIG = {
+          introYoutubeSrc: 'https://www.youtube.com/embed/2w-2RuihBls?si=cgXyBmySeAxoDo_l&autoplay=1&rel=0&playsinline=1&enablejsapi=1',
+          showcaseYoutubeSrc: 'https://www.youtube.com/embed/gocMcpU0A3M?si=PEpid4COlhRESl-l&autoplay=1&mute=1&loop=1&playlist=gocMcpU0A3M&playsinline=1&rel=0'
+        };
+
+        const TOTAL_SLIDES = 8;
+        const modules = Array.from(document.querySelectorAll('.cue-module'));
+        const topBar = document.getElementById('topBar');
+        const nextCueBtn = document.getElementById('nextCueBtn');
+        const prevCueBtn = document.getElementById('prevCueBtn');
+        const cueCounterLabel = document.getElementById('cueCounterLabel');
+        const tinyCountdown = document.getElementById('tinyCountdown');
+        const cueBurst = document.getElementById('cueBurst');
+
+        // Slide 2 Auto-Play YouTube Elements
+        const introPosterImg = document.getElementById('introPosterImg');
+        const introYtFrame = document.getElementById('introYtFrame');
+        const videoTinyTimer = document.getElementById('videoTinyTimer');
+        const videoPlayingFx = document.getElementById('videoPlayingFx');
+
+        // Slide 5 YouTube Element
+        const showcaseYtFrame = document.getElementById('showcaseYtFrame');
+
+        const state = {
+          currentSlide: 0,
+          isCountingDown: false,
+          countdownTimer: null,
+          videoDelayTimer: null,
+          drakeTimer: null,
+          waveEnergy: 0.22,
+          waveTargetEnergy: 0.22
+        };
+
+        function formatINR(value) {
+          return '₹' + Math.round(value).toLocaleString('en-IN');
+        }
+
+        function fireGoldBurst() {
+          cueBurst.classList.remove('fire');
+          void cueBurst.offsetWidth;
+          cueBurst.classList.add('fire');
+          state.waveEnergy = 1.35;
+          state.waveTargetEnergy = 0.24;
+        }
+
+        function stopSlide2VideoCountdown() {
+          if (state.videoDelayTimer) {
+            clearInterval(state.videoDelayTimer);
+            state.videoDelayTimer = null;
+          }
+          videoTinyTimer.classList.remove('active');
+          videoPlayingFx.classList.remove('playing');
+          introYtFrame.removeAttribute('src');
+          introYtFrame.style.display = 'none';
+          introPosterImg.style.display = 'block';
+        }
+
+        function stopSlide5Video() {
+          showcaseYtFrame.removeAttribute('src');
+        }
+
+        function startSlide2AutoVideo() {
+          stopSlide2VideoCountdown();
+
+          let sec = 5;
+          videoTinyTimer.textContent = String(sec);
+          videoTinyTimer.classList.add('active');
+
+          state.videoDelayTimer = setInterval(() => {
+            sec -= 1;
+            if (sec > 0) {
+              videoTinyTimer.textContent = String(sec);
+            } else {
+              videoTinyTimer.textContent = '0';
+              clearInterval(state.videoDelayTimer);
+              state.videoDelayTimer = null;
+
+              setTimeout(() => {
+                videoTinyTimer.classList.remove('active');
+                introPosterImg.style.display = 'none';
+                introYtFrame.style.display = 'block';
+                introYtFrame.src = VIDEO_CONFIG.introYoutubeSrc;
+                videoPlayingFx.classList.add('playing');
+                state.waveEnergy = 0.9;
+              }, 80);
+            }
+          }, 960);
+        }
+
+        // Listen for YouTube player end state when enablejsapi=1 fires
+        window.addEventListener('message', (event) => {
+          if (typeof event.data !== 'string') return;
+          try {
+            const payload = JSON.parse(event.data);
+            if (payload.event === 'onStateChange' && payload.info === 0) {
+              videoPlayingFx.classList.remove('playing');
+            }
+          } catch (_) {
+            // Ignore non-JSON postMessages
+          }
+        });
+
+        introYtFrame.addEventListener('load', () => {
+          if (introYtFrame.src) {
+            try {
+              introYtFrame.contentWindow.postMessage(
+                JSON.stringify({ event: 'listening' }),
+                '*'
+              );
+            } catch (_) {}
+          }
+        });
+
+        function startDrakeNodeCycle() {
+          if (state.drakeTimer) clearInterval(state.drakeTimer);
+          const nodes = [0, 1, 2, 3].map((i) => document.getElementById(`dNode${i}`));
+          let active = 0;
+          nodes.forEach((n, idx) => n.classList.toggle('active', idx === 0));
+          state.drakeTimer = setInterval(() => {
+            active = (active + 1) % 4;
+            nodes.forEach((n, idx) => n.classList.toggle('active', idx <= active));
+          }, 700);
+        }
+
+        function showSlide(targetIdx, withBurst = true) {
+          const safeIdx = ((targetIdx % TOTAL_SLIDES) + TOTAL_SLIDES) % TOTAL_SLIDES;
+          state.currentSlide = safeIdx;
+          cueCounterLabel.textContent = `${String(safeIdx + 1).padStart(2, '0')} / 0${TOTAL_SLIDES}`;
+
+          // Reveal BOMBEAT header starting from Slide 2
+          topBar.classList.toggle('visible', safeIdx >= 1);
+
+          stopSlide2VideoCountdown();
+          stopSlide5Video();
+          if (state.drakeTimer) {
+            clearInterval(state.drakeTimer);
+            state.drakeTimer = null;
+          }
+
+          modules.forEach((mod, idx) => {
+            mod.classList.remove('active', 'entering');
+            if (idx === safeIdx) {
+              mod.classList.add('active');
+              void mod.offsetWidth;
+              mod.classList.add('entering');
+            }
+          });
+
+          if (withBurst) fireGoldBurst();
+
+          if (safeIdx === 1) startSlide2AutoVideo();
+          if (safeIdx === 3) animateTractionCountersAndChart();
+          if (safeIdx === 4) {
+            showcaseYtFrame.src = VIDEO_CONFIG.showcaseYoutubeSrc;
+          }
+          if (safeIdx === 5) startDrakeNodeCycle();
+        }
+
+        function clearSlideCountdown() {
+          if (state.countdownTimer) {
+            clearInterval(state.countdownTimer);
+            state.countdownTimer = null;
+          }
+          state.isCountingDown = false;
+          tinyCountdown.classList.remove('active');
+          state.waveTargetEnergy = 0.22;
+        }
+
+        /* =========================================================
+           TINY IN-PLACE 5 -> 0 COUNTDOWN (NEXT SLIDE HIDDEN)
+        ========================================================= */
+        function triggerSlideWith5SecCountdown(targetIdx) {
+          if (state.isCountingDown) return;
+
+          stopSlide2VideoCountdown();
+          stopSlide5Video();
+          modules.forEach((m) => m.classList.remove('active', 'entering'));
+
+          state.isCountingDown = true;
+          let count = 5;
+          tinyCountdown.textContent = String(count);
+          tinyCountdown.classList.add('active');
+          state.waveTargetEnergy = 0.45;
+
+          state.countdownTimer = setInterval(() => {
+            count -= 1;
+            if (count > 0) {
+              tinyCountdown.textContent = String(count);
+              state.waveEnergy = 0.45 + (5 - count) * 0.12;
+            } else {
+              tinyCountdown.textContent = '0';
+              clearInterval(state.countdownTimer);
+              state.countdownTimer = null;
+
+              setTimeout(() => {
+                tinyCountdown.classList.remove('active');
+                state.isCountingDown = false;
+                showSlide(targetIdx, true);
+              }, 110);
+            }
+          }, 1000);
+        }
+
+        nextCueBtn.addEventListener('click', () => {
+          const next = (state.currentSlide + 1) % TOTAL_SLIDES;
+          triggerSlideWith5SecCountdown(next);
+        });
+
+        prevCueBtn.addEventListener('click', () => {
+          clearSlideCountdown();
+          const prev = (state.currentSlide - 1 + TOTAL_SLIDES) % TOTAL_SLIDES;
+          showSlide(prev, true);
+        });
+
+        window.addEventListener('keydown', (e) => {
+          if (e.code === 'Space' || e.code === 'ArrowRight') {
+            e.preventDefault();
+            const next = (state.currentSlide + 1) % TOTAL_SLIDES;
+            triggerSlideWith5SecCountdown(next);
+          } else if (e.code === 'ArrowLeft') {
+            e.preventDefault();
+            clearSlideCountdown();
+            const prev = (state.currentSlide - 1 + TOTAL_SLIDES) % TOTAL_SLIDES;
+            showSlide(prev, true);
+          }
+        });
+
+        /* =========================================================
+           SLIDE 4: TRACTION COUNTERS & CHART
+        ========================================================= */
+        const DEALS_DATA = [
+          { label: 'Gig #1', gross: 2000, net: 860 },
+          { label: 'Gig #2', gross: 17500, net: 7525 },
+          { label: 'Gig #3', gross: 10000, net: 4300 },
+          { label: 'Gig #4', gross: 6000, net: 2580 }
+        ];
+
+        const counterGross = document.getElementById('counterGross');
+        const counterNet = document.getElementById('counterNet');
+        const tractionChartSvg = document.getElementById('tractionChartSvg');
+        const dealRows = Array.from(document.querySelectorAll('.deal-row'));
+
+        function animateValue(el, target, duration) {
+          const start = performance.now();
+          function step(now) {
+            const p = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - p, 3);
+            el.textContent = formatINR(target * eased);
+            if (p < 1) requestAnimationFrame(step);
+          }
+          requestAnimationFrame(step);
+        }
+
+        function renderTractionChart(activeIdx = 1) {
+          const W = 640;
+          const H = 230;
+          const padL = 54;
+          const padR = 24;
+          const padT = 24;
+          const padB = 34;
+          const plotW = W - padL - padR;
+          const plotH = H - padT - padB;
+          const maxVal = 20000;
+
+          const parts = [];
+          [0, 5000, 10000, 15000, 20000].forEach((tick) => {
+            const y = padT + plotH - (tick / maxVal) * plotH;
+            parts.push(`<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="rgba(255,255,255,0.07)" stroke-width="1" />`);
+            parts.push(`<text x="${padL - 10}" y="${y + 4}" text-anchor="end" fill="#6E6C64" font-family="JetBrains Mono, monospace" font-size="11">₹${tick / 1000}k</text>`);
+          });
+
+          const colWidth = plotW / DEALS_DATA.length;
+          const linePoints = [];
+
+          DEALS_DATA.forEach((d, i) => {
+            const cx = padL + colWidth * i + colWidth * 0.5;
+            const grossH = (d.gross / maxVal) * plotH;
+            const netH = (d.net / maxVal) * plotH;
+            const barW = 46;
+            const barX = cx - barW / 2;
+            const grossY = padT + plotH - grossH;
+            const netY = padT + plotH - netH;
+            const isActive = i === activeIdx;
+
+            linePoints.push(`${cx},${netY}`);
+            parts.push(`
+              <g>
+                <rect x="${barX}" y="${grossY}" width="${barW}" height="${grossH}" rx="7"
+                  fill="${isActive ? 'rgba(245,208,97,0.92)' : 'rgba(212,175,55,0.38)'}"
+                  stroke="${isActive ? '#FFF5CC' : 'rgba(212,175,55,0.45)'}" stroke-width="1.2" />
+                <rect x="${barX + 10}" y="${netY}" width="${barW - 20}" height="${netH}" rx="4"
+                  fill="rgba(247,246,242,0.88)" />
+                <text x="${cx}" y="${grossY - 8}" text-anchor="middle" fill="#F7F6F2" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700">
+                  ${formatINR(d.gross)}
+                </text>
+                <text x="${cx}" y="${H - 10}" text-anchor="middle" fill="${isActive ? '#F5D061' : '#A8A69E'}" font-family="DM Sans, sans-serif" font-size="13" font-weight="700">
+                  ${d.label}
+                </text>
+              </g>
+            `);
+          });
+
+          parts.push(`<polyline points="${linePoints.join(' ')}" fill="none" stroke="#F7F6F2" stroke-width="2" stroke-dasharray="4 3" opacity="0.85" />`);
+          tractionChartSvg.innerHTML = parts.join('');
+        }
+
+        function animateTractionCountersAndChart() {
+          animateValue(counterGross, 35500, 1000);
+          animateValue(counterNet, 15265, 1150);
+          renderTractionChart(1);
+        }
+
+        dealRows.forEach((row) => {
+          row.addEventListener('mouseenter', () => {
+            const idx = Number(row.dataset.dealIdx);
+            dealRows.forEach((r, i) => r.classList.toggle('active', i === idx));
+            renderTractionChart(idx);
+          });
+        });
+
+        renderTractionChart(1);
+
+        /* =========================================================
+           60FPS GOLD AUDIO-VISUALIZER WAVE
+        ========================================================= */
+        const canvas = document.getElementById('audioWaveCanvas');
+        const ctx = canvas.getContext('2d');
+        let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        function resizeCanvas() {
+          dpr = Math.min(window.devicePixelRatio || 1, 2);
+          canvas.width = window.innerWidth * dpr;
+          canvas.height = 36 * dpr;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let phase = 0;
+        function renderWave() {
+          const width = canvas.width;
+          const height = canvas.height;
+          ctx.clearRect(0, 0, width, height);
+
+          state.waveEnergy += (state.waveTargetEnergy - state.waveEnergy) * 0.06;
+          phase += 0.04 + state.waveEnergy * 0.035;
+
+          const barCount = Math.max(48, Math.floor(window.innerWidth / 16));
+          const gap = width / barCount;
+          const barWidth = Math.max(2 * dpr, gap * 0.4);
+
+          for (let i = 0; i < barCount; i++) {
+            const norm = i / barCount;
+            const envelope = Math.sin(norm * Math.PI);
+            const harmonic =
+              Math.sin(norm * 14 + phase) * 0.45 +
+              Math.cos(norm * 27 - phase * 1.4) * 0.35 +
+              Math.sin(norm * 6 + phase * 0.7) * 0.2;
+
+            const amp = (0.18 + Math.abs(harmonic) * 0.82) * state.waveEnergy * envelope;
+            const barH = Math.max(3 * dpr, Math.min(height * 0.85, amp * height * 0.88));
+            const x = i * gap + (gap - barWidth) / 2;
+            const y = height - barH;
+
+            ctx.fillStyle =
+              i % 3 === 0
+                ? `rgba(245, 208, 97, ${0.36 + Math.min(0.55, amp)})`
+                : `rgba(212, 175, 55, ${0.2 + Math.min(0.4, amp)})`;
+
+            ctx.beginPath();
+            if (typeof ctx.roundRect === 'function') {
+              ctx.roundRect(x, y, barWidth, barH, 2 * dpr);
+            } else {
+              ctx.rect(x, y, barWidth, barH);
+            }
+            ctx.fill();
+          }
+
+          requestAnimationFrame(renderWave);
+        }
+        requestAnimationFrame(renderWave);
+      })();
+    </script>
+  </body>
+</html>

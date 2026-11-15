@@ -1,0 +1,6 @@
+{
+  "name": "BOMBEAT — Mumbai's Live Music Engine",
+  "description": "Interactive Gesture-Sync Shark Tank stage presentation and command center for BOMBEAT, Mumbai's on-demand live music entertainment marketplace.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
