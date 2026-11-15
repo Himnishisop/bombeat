@@ -653,6 +653,84 @@
         white-space: nowrap;
       }
 
+      /* DRAKE Holographic 3D Sphere (Appears 5s after Slide 6 opens, disappears after TTS) */
+      .drake-sphere-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 45;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        opacity: 0;
+        background: radial-gradient(circle at 50% 50%, rgba(5, 5, 7, 0.72) 0%, rgba(5, 5, 7, 0.35) 55%, transparent 100%);
+        transition: opacity 420ms ease;
+      }
+
+      .drake-sphere-overlay.visible {
+        opacity: 1;
+      }
+
+      .drake-sphere-shell {
+        position: relative;
+        width: 300px;
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: scale(0.25);
+        opacity: 0;
+        filter: blur(10px);
+        transition:
+          transform 600ms var(--ease-out-expo),
+          opacity 480ms ease,
+          filter 520ms ease;
+      }
+
+      .drake-sphere-overlay.visible .drake-sphere-shell {
+        transform: scale(1);
+        opacity: 1;
+        filter: blur(0);
+      }
+
+      .drake-sphere-overlay.vanishing .drake-sphere-shell {
+        transform: scale(0.08);
+        opacity: 0;
+        filter: blur(14px);
+        transition:
+          transform 560ms cubic-bezier(0.55, 0, 0.85, 0.35),
+          opacity 480ms ease,
+          filter 480ms ease;
+      }
+
+      .drake-sphere-halo {
+        position: absolute;
+        inset: 22px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(245, 208, 97, 0.32) 0%, rgba(212, 175, 55, 0.1) 48%, transparent 72%);
+        filter: blur(14px);
+        animation: sphereBreath 1.8s ease-in-out infinite;
+      }
+
+      @keyframes sphereBreath {
+        0%,
+        100% {
+          transform: scale(0.95);
+          opacity: 0.78;
+        }
+        50% {
+          transform: scale(1.08);
+          opacity: 1;
+        }
+      }
+
+      #drakeSphereCanvas {
+        position: relative;
+        width: 300px;
+        height: 300px;
+        display: block;
+      }
+
       /* =========================================================
          SLIDE 7: PRACTICAL USEFUL KNOWLEDGE VS SCHOOL KNOWLEDGE
       ========================================================= */
@@ -932,7 +1010,7 @@
                 referrerpolicy="strict-origin-when-cross-origin"
                 allowfullscreen
               ></iframe>
-              <span id="videoTinyTimer" class="video-tiny-timer">5</span>
+              <span id="videoTinyTimer" class="video-tiny-timer">7</span>
               <div id="videoPlayingFx" class="video-playing-fx"></div>
             </div>
           </div>
@@ -1141,6 +1219,13 @@
               </div>
             </div>
           </div>
+
+          <div id="drakeSphereOverlay" class="drake-sphere-overlay" aria-hidden="true">
+            <div class="drake-sphere-shell">
+              <div class="drake-sphere-halo"></div>
+              <canvas id="drakeSphereCanvas"></canvas>
+            </div>
+          </div>
         </section>
 
         <!-- =======================================================
@@ -1250,15 +1335,31 @@
         // Slide 5 YouTube Element
         const showcaseYtFrame = document.getElementById('showcaseYtFrame');
 
+        // Slide 6 DRAKE Sphere & TTS Elements
+        const drakeSphereOverlay = document.getElementById('drakeSphereOverlay');
+        const drakeSphereCanvas = document.getElementById('drakeSphereCanvas');
+        const drakeSphereCtx = drakeSphereCanvas.getContext('2d');
+
         const state = {
           currentSlide: 0,
           isCountingDown: false,
           countdownTimer: null,
           videoDelayTimer: null,
           drakeTimer: null,
+          drakeSphereDelayTimer: null,
+          drakeSphereCleanupTimer: null,
+          drakeSphereFallbackTimer: null,
+          drakeSphereRaf: null,
+          drakeSphereSpeaking: false,
           waveEnergy: 0.22,
           waveTargetEnergy: 0.22
         };
+
+        // Preload TTS voices if supported
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.getVoices();
+          window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+        }
 
         function formatINR(value) {
           return '₹' + Math.round(value).toLocaleString('en-IN');
@@ -1288,10 +1389,190 @@
           showcaseYtFrame.removeAttribute('src');
         }
 
+        /* =========================================================
+           DRAKE 3D HOLOGRAPHIC SPHERE + BROWSER TTS
+        ========================================================= */
+        const SPHERE_POINTS = [];
+        const POINT_COUNT = 150;
+        const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
+        for (let i = 0; i < POINT_COUNT; i++) {
+          const y = 1 - (i / (POINT_COUNT - 1)) * 2;
+          const radius = Math.sqrt(1 - y * y);
+          const theta = GOLDEN_ANGLE * i;
+          SPHERE_POINTS.push({
+            x: Math.cos(theta) * radius,
+            y,
+            z: Math.sin(theta) * radius
+          });
+        }
+
+        let sphereAngle = 0;
+        function renderDrakeSphere() {
+          if (!state.drakeSphereRaf) return;
+          const size = 300;
+          const dprSphere = Math.min(window.devicePixelRatio || 1, 2);
+          if (drakeSphereCanvas.width !== size * dprSphere) {
+            drakeSphereCanvas.width = size * dprSphere;
+            drakeSphereCanvas.height = size * dprSphere;
+          }
+
+          const sctx = drakeSphereCtx;
+          sctx.clearRect(0, 0, drakeSphereCanvas.width, drakeSphereCanvas.height);
+
+          const cx = drakeSphereCanvas.width / 2;
+          const cy = drakeSphereCanvas.height / 2;
+          const pulse = state.drakeSphereSpeaking
+            ? 1 + Math.sin(performance.now() * 0.018) * 0.065
+            : 1 + Math.sin(performance.now() * 0.004) * 0.02;
+          const R = 94 * dprSphere * pulse;
+
+          sphereAngle += state.drakeSphereSpeaking ? 0.036 : 0.016;
+          const cosY = Math.cos(sphereAngle);
+          const sinY = Math.sin(sphereAngle);
+          const tiltX = 0.38;
+          const cosX = Math.cos(tiltX);
+          const sinX = Math.sin(tiltX);
+
+          // Glowing inner sphere core
+          const coreGrad = sctx.createRadialGradient(cx, cy, 4 * dprSphere, cx, cy, R);
+          coreGrad.addColorStop(0, 'rgba(255, 245, 204, 0.52)');
+          coreGrad.addColorStop(0.45, 'rgba(245, 208, 97, 0.22)');
+          coreGrad.addColorStop(1, 'rgba(212, 175, 55, 0)');
+          sctx.fillStyle = coreGrad;
+          sctx.beginPath();
+          sctx.arc(cx, cy, R, 0, Math.PI * 2);
+          sctx.fill();
+
+          // Outer orbital wireframe rings
+          [0, 1, 2].forEach((ringIdx) => {
+            sctx.save();
+            sctx.translate(cx, cy);
+            sctx.rotate(sphereAngle * (ringIdx % 2 === 0 ? 0.7 : -0.9) + ringIdx * 1.05);
+            sctx.scale(1, 0.36 + ringIdx * 0.14);
+            sctx.strokeStyle =
+              ringIdx === 0
+                ? 'rgba(245, 208, 97, 0.65)'
+                : 'rgba(212, 175, 55, 0.32)';
+            sctx.lineWidth = 1.4 * dprSphere;
+            sctx.beginPath();
+            sctx.arc(0, 0, R * (1.06 + ringIdx * 0.06), 0, Math.PI * 2);
+            sctx.stroke();
+            sctx.restore();
+          });
+
+          // 3D Fibonacci particle sphere
+          for (let i = 0; i < SPHERE_POINTS.length; i++) {
+            const p = SPHERE_POINTS[i];
+            const rx = p.x * cosY - p.z * sinY;
+            const rz = p.x * sinY + p.z * cosY;
+            const ry = p.y * cosX - rz * sinX;
+            const fz = p.y * sinX + rz * cosX;
+
+            const depth = (fz + 1.4) / 2.4;
+            const px = cx + rx * R;
+            const py = cy + ry * R;
+            const dotR = (1.3 + depth * 2.1) * dprSphere;
+
+            sctx.fillStyle = `rgba(245, 208, 97, ${0.2 + depth * 0.78})`;
+            sctx.beginPath();
+            sctx.arc(px, py, dotR, 0, Math.PI * 2);
+            sctx.fill();
+          }
+
+          state.drakeSphereRaf = requestAnimationFrame(renderDrakeSphere);
+        }
+
+        function stopDrakeSphereAndSpeech() {
+          if (state.drakeSphereDelayTimer) {
+            clearTimeout(state.drakeSphereDelayTimer);
+            state.drakeSphereDelayTimer = null;
+          }
+          if (state.drakeSphereCleanupTimer) {
+            clearTimeout(state.drakeSphereCleanupTimer);
+            state.drakeSphereCleanupTimer = null;
+          }
+          if (state.drakeSphereFallbackTimer) {
+            clearTimeout(state.drakeSphereFallbackTimer);
+            state.drakeSphereFallbackTimer = null;
+          }
+          if (state.drakeSphereRaf) {
+            cancelAnimationFrame(state.drakeSphereRaf);
+            state.drakeSphereRaf = null;
+          }
+          state.drakeSphereSpeaking = false;
+          drakeSphereOverlay.classList.remove('visible', 'vanishing');
+          if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+          }
+        }
+
+        function vanishDrakeSphere() {
+          if (state.drakeSphereFallbackTimer) {
+            clearTimeout(state.drakeSphereFallbackTimer);
+            state.drakeSphereFallbackTimer = null;
+          }
+          state.drakeSphereSpeaking = false;
+          state.waveTargetEnergy = 0.22;
+          drakeSphereOverlay.classList.add('vanishing');
+
+          state.drakeSphereCleanupTimer = setTimeout(() => {
+            stopDrakeSphereAndSpeech();
+          }, 580);
+        }
+
+        function triggerDrakeSphereSequence() {
+          stopDrakeSphereAndSpeech();
+
+          // Trigger right after 5 seconds of Slide 6 displaying
+          state.drakeSphereDelayTimer = setTimeout(() => {
+            drakeSphereOverlay.classList.remove('vanishing');
+            drakeSphereOverlay.classList.add('visible');
+            state.drakeSphereSpeaking = true;
+            state.waveEnergy = 1.25;
+            state.waveTargetEnergy = 0.75;
+
+            if (!state.drakeSphereRaf) {
+              state.drakeSphereRaf = requestAnimationFrame(renderDrakeSphere);
+            }
+
+            let finished = false;
+            const finishOnce = () => {
+              if (finished) return;
+              finished = true;
+              vanishDrakeSphere();
+            };
+
+            if ('speechSynthesis' in window) {
+              window.speechSynthesis.cancel();
+              const utterance = new SpeechSynthesisUtterance('at your service himnish');
+              const voices = window.speechSynthesis.getVoices();
+              const preferredVoice =
+                voices.find((v) => /en[-_](GB|IN|US)/i.test(v.lang) && /male|daniel|david|rishi|google/i.test(v.name)) ||
+                voices.find((v) => /^en/i.test(v.lang));
+              if (preferredVoice) utterance.voice = preferredVoice;
+              utterance.rate = 0.94;
+              utterance.pitch = 0.88;
+              utterance.volume = 1;
+
+              utterance.onend = () => {
+                setTimeout(finishOnce, 220);
+              };
+              utterance.onerror = () => {
+                setTimeout(finishOnce, 1800);
+              };
+
+              window.speechSynthesis.speak(utterance);
+            }
+
+            // Safety fallback in case TTS is muted/blocked in headless browsers
+            state.drakeSphereFallbackTimer = setTimeout(finishOnce, 3200);
+          }, 5000);
+        }
+
         function startSlide2AutoVideo() {
           stopSlide2VideoCountdown();
 
-          let sec = 5;
+          let sec = 7;
           videoTinyTimer.textContent = String(sec);
           videoTinyTimer.classList.add('active');
 
@@ -1313,7 +1594,7 @@
                 state.waveEnergy = 0.9;
               }, 80);
             }
-          }, 960);
+          }, 1000);
         }
 
         // Listen for YouTube player end state when enablejsapi=1 fires
@@ -1361,6 +1642,7 @@
 
           stopSlide2VideoCountdown();
           stopSlide5Video();
+          stopDrakeSphereAndSpeech();
           if (state.drakeTimer) {
             clearInterval(state.drakeTimer);
             state.drakeTimer = null;
@@ -1382,7 +1664,10 @@
           if (safeIdx === 4) {
             showcaseYtFrame.src = VIDEO_CONFIG.showcaseYoutubeSrc;
           }
-          if (safeIdx === 5) startDrakeNodeCycle();
+          if (safeIdx === 5) {
+            startDrakeNodeCycle();
+            triggerDrakeSphereSequence();
+          }
         }
 
         function clearSlideCountdown() {
@@ -1403,6 +1688,7 @@
 
           stopSlide2VideoCountdown();
           stopSlide5Video();
+          stopDrakeSphereAndSpeech();
           modules.forEach((m) => m.classList.remove('active', 'entering'));
 
           state.isCountingDown = true;
