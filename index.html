@@ -260,13 +260,27 @@
         font-variant-numeric: tabular-nums;
       }
 
+      /* Small Bottom Script Note per Slide */
+      .slide-note {
+        margin: 20px auto 0;
+        max-width: 920px;
+        padding: 10px 18px;
+        border-radius: 10px;
+        background: rgba(10, 10, 14, 0.72);
+        border: 1px solid rgba(212, 175, 55, 0.16);
+        font-size: 0.76rem;
+        line-height: 1.48;
+        color: rgba(247, 246, 242, 0.72);
+        text-align: center;
+      }
+
       /* =========================================================
          SLIDE 1: DULL PARTY PHOTO HOOK
       ========================================================= */
       .boring-party-frame {
         position: relative;
         width: 100%;
-        height: min(76vh, 660px);
+        height: min(62vh, 540px);
         border-radius: 22px;
         overflow: hidden;
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -975,6 +989,9 @@
               <div class="boring-sub">Everyone on their phones. How do you end it?</div>
             </div>
           </div>
+          <p class="slide-note stagger-item" style="--stagger: 1">
+            Look at this picture. We have all been to a party like this. The food is good, the place looks nice, everyone is dressed up&hellip; but the vibe is totally dead because everyone is staring at their phones, chatting, doomscrolling, and some are stressed about their work in a party which was meant to have fun. That&rsquo;s a huge problem. What&rsquo;s the fix? The fix is...
+          </p>
         </section>
 
         <!-- =======================================================
@@ -1015,6 +1032,9 @@
               <div id="videoPlayingFx" class="video-playing-fx"></div>
             </div>
           </div>
+          <p id="slide2Note" class="slide-note stagger-item" style="--stagger: 3">
+            BOMBEAT. We are a live music agency for Mumbai. Let&rsquo;s see how we can rock your parties.
+          </p>
         </section>
 
         <!-- =======================================================
@@ -1086,6 +1106,9 @@
               </div>
             </div>
           </div>
+          <p class="slide-note stagger-item" style="--stagger: 5">
+            So we run targeted Meta ads on Facebook and Instagram to people who are really searching for live music for their event. They find our ad while they scroll reels&mdash;that means I earn when you guys scroll reels, just joking. So they find our ads while scrolling, and if they are interested, they land directly in our WhatsApp Business chat. Now here, we discuss exactly what the client wants. Of course, there are some rejections, but that&rsquo;s part of the business. So clients tell us what type of musician they want, and we assign singers to them. But where do we get these singers from? You see, my dad is a singer and guitarist himself, and he&rsquo;s been working in this industry for 18 years, so he built a network of several singers with all his experience who charge less, but are skillful too. So we assign a singer to the client and charge more from the client than we pay to the singer, and the rest of it is our commission, which means profit. And as I told you, why imagine if I am already an entrepreneur? Let&rsquo;s move on to the sales.
+          </p>
         </section>
 
         <!-- =======================================================
@@ -1134,6 +1157,9 @@
               </div>
             </div>
           </div>
+          <p class="slide-note stagger-item" style="--stagger: 5">
+            5 weeks. We launched BOMBEAT on 9th of October, and we did 35,500 in revenue, from which 15,000 is pure profit. And we made it till here in just 4 bookings, without any automation. Imagine what if I automate the WhatsApp chats. But let&rsquo;s first look at some evidence.
+          </p>
         </section>
 
         <!-- =======================================================
@@ -1170,6 +1196,9 @@
               />
             </div>
           </div>
+          <p class="slide-note stagger-item" style="--stagger: 3">
+            That was the exact ad, and there were many like them that made people interested and made them land on our WhatsApp chat. Here is a review by one of our clients, and this is a payment proof that proves that our model is actually working. So how do we scale it? We scale it with automation. And again, why imagine if I can already automate?
+          </p>
         </section>
 
         <!-- =======================================================
@@ -1227,6 +1256,9 @@
               <canvas id="drakeSphereCanvas"></canvas>
             </div>
           </div>
+          <p class="slide-note stagger-item" style="--stagger: 3">
+            Drake. Drake is my personal AI assistant. Of course, I made it, and right now it handles all my desktop automation through Gemini AI servers and cloud memory integration. Its performance varies on how much data we feed it, and soon it is going to handle all the business chats using the WhatsApp Business API. So I don&rsquo;t need to chat for hours and be sad on a rejection&mdash;my assistant does it all. Now you may think that I should focus on my school studies.
+          </p>
         </section>
 
         <!-- =======================================================
@@ -1263,6 +1295,9 @@
               <div class="vs-title" style="color: var(--text-secondary)">School Knowledge</div>
             </div>
           </div>
+          <p class="slide-note stagger-item" style="--stagger: 3">
+            People often tell me to focus on my school studies, stop chasing money, and gain knowledge. But why do we go to school? To get educated and get a job to earn money, right? Okay, you guys are saying that knowledge is more important than money. But according to that, I gain more practical, useful knowledge in a day from my business than I gain knowledge from school in a whole week. And if talking about actual, useful, practical knowledge, then school stands nowhere.
+          </p>
         </section>
 
         <!-- =======================================================
@@ -1290,6 +1325,9 @@
               <span class="brand-wordmark">BOMBEAT</span>
             </div>
           </div>
+          <p class="slide-note stagger-item" style="--stagger: 3">
+            Alright, thank you for giving me your time. If you guys get my perspective, good for you, because y&rsquo;all really have to learn to differentiate between actual useful knowledge and knowledge that you guys get after rewriting Q&amp;A for hours, even when they were already available online.
+          </p>
         </section>
       </div>
     </main>
@@ -4051,8 +4089,15 @@ Uhm6FQAAAAA=
           }, 5000);
         }
 
+        const slide2Note = document.getElementById('slide2Note');
+        const SLIDE2_NOTE_INTRO =
+          'BOMBEAT. We are a live music agency for Mumbai. Let’s see how we can rock your parties.';
+        const SLIDE2_NOTE_VIDEO =
+          'You see, all of them are dancing and enjoying. And that singer who is singing there, he is my dad. Interesting, right? We rock your parties and events by providing live music. Confused how, exactly, right? Let me explain to you how it works.';
+
         function startSlide2AutoVideo() {
           stopSlide2VideoCountdown();
+          if (slide2Note) slide2Note.textContent = SLIDE2_NOTE_INTRO;
 
           let sec = 7;
           videoTinyTimer.textContent = String(sec);
@@ -4073,6 +4118,7 @@ Uhm6FQAAAAA=
                 introYtFrame.style.display = 'block';
                 introYtFrame.src = VIDEO_CONFIG.introYoutubeSrc;
                 videoPlayingFx.classList.add('playing');
+                if (slide2Note) slide2Note.textContent = SLIDE2_NOTE_VIDEO;
                 state.waveEnergy = 0.9;
               }, 80);
             }
