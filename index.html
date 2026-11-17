@@ -3838,8 +3838,8 @@ Uhm6FQAAAAA=
         });
 
         const VIDEO_CONFIG = {
-          introYoutubeSrc: 'https://www.youtube.com/embed/2w-2RuihBls?si=cgXyBmySeAxoDo_l&autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&disablekb=1&playsinline=1&enablejsapi=1',
-          showcaseYoutubeSrc: 'https://www.youtube.com/embed/gocMcpU0A3M?si=PEpid4COlhRESl-l&autoplay=1&controls=0&loop=1&playlist=gocMcpU0A3M&rel=0&modestbranding=1&iv_load_policy=3&fs=0&disablekb=1&playsinline=1&enablejsapi=1'
+          introYoutubeSrc: 'https://www.youtube.com/embed/2w-2RuihBls?si=cgXyBmySeAxoDo_l&autoplay=1&loop=0&controls=0&cc_load_policy=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&disablekb=1&playsinline=1&enablejsapi=1',
+          showcaseYoutubeSrc: 'https://www.youtube.com/embed/gocMcpU0A3M?si=PEpid4COlhRESl-l&autoplay=1&loop=0&controls=0&cc_load_policy=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&disablekb=1&playsinline=1&enablejsapi=1'
         };
 
         const TOTAL_SLIDES = 8;
@@ -4130,61 +4130,65 @@ Uhm6FQAAAAA=
           }, 1000);
         }
 
-        // Listen for YouTube player end state when enablejsapi=1 fires
+        function sendYtCommand(frame, func, args = []) {
+          if (!frame || !frame.src || !frame.contentWindow) return;
+          try {
+            frame.contentWindow.postMessage(
+              JSON.stringify({ event: 'command', func, args }),
+              '*'
+            );
+          } catch (_) {}
+        }
+
+        function disableYtCaptions(frame) {
+          sendYtCommand(frame, 'unloadModule', ['captions']);
+          sendYtCommand(frame, 'unloadModule', ['cc']);
+          sendYtCommand(frame, 'setOption', ['captions', 'track', {}]);
+        }
+
+        function setupCleanYtFrame(frame) {
+          if (!frame || !frame.src) return;
+          try {
+            frame.contentWindow.postMessage(
+              JSON.stringify({ event: 'listening' }),
+              '*'
+            );
+          } catch (_) {}
+          sendYtCommand(frame, 'unMute');
+          sendYtCommand(frame, 'setVolume', [100]);
+          disableYtCaptions(frame);
+          sendYtCommand(frame, 'playVideo');
+          setTimeout(() => {
+            sendYtCommand(frame, 'unMute');
+            sendYtCommand(frame, 'setVolume', [100]);
+            disableYtCaptions(frame);
+          }, 350);
+          setTimeout(() => {
+            disableYtCaptions(frame);
+          }, 1100);
+        }
+
+        // Listen for YouTube player events (end state & caption suppression)
         window.addEventListener('message', (event) => {
           if (typeof event.data !== 'string') return;
           try {
             const payload = JSON.parse(event.data);
+            if (payload.event === 'onReady' || (payload.event === 'onStateChange' && (payload.info === 1 || payload.info === 3))) {
+              if (event.source === introYtFrame.contentWindow) disableYtCaptions(introYtFrame);
+              if (event.source === showcaseYtFrame.contentWindow) disableYtCaptions(showcaseYtFrame);
+            }
             if (payload.event === 'onStateChange' && payload.info === 0) {
-              videoPlayingFx.classList.remove('playing');
+              if (event.source === introYtFrame.contentWindow) {
+                videoPlayingFx.classList.remove('playing');
+              }
             }
           } catch (_) {
             // Ignore non-JSON postMessages
           }
         });
 
-        introYtFrame.addEventListener('load', () => {
-          if (introYtFrame.src) {
-            try {
-              introYtFrame.contentWindow.postMessage(
-                JSON.stringify({ event: 'listening' }),
-                '*'
-              );
-              introYtFrame.contentWindow.postMessage(
-                JSON.stringify({ event: 'command', func: 'unMute', args: [] }),
-                '*'
-              );
-              introYtFrame.contentWindow.postMessage(
-                JSON.stringify({ event: 'command', func: 'setVolume', args: [100] }),
-                '*'
-              );
-              introYtFrame.contentWindow.postMessage(
-                JSON.stringify({ event: 'command', func: 'playVideo', args: [] }),
-                '*'
-              );
-            } catch (_) {}
-          }
-        });
-
-        showcaseYtFrame.addEventListener('load', () => {
-          if (showcaseYtFrame.src) {
-            const sendYtCmd = (func, args = []) => {
-              try {
-                showcaseYtFrame.contentWindow.postMessage(
-                  JSON.stringify({ event: 'command', func, args }),
-                  '*'
-                );
-              } catch (_) {}
-            };
-            sendYtCmd('unMute');
-            sendYtCmd('setVolume', [100]);
-            sendYtCmd('playVideo');
-            setTimeout(() => {
-              sendYtCmd('unMute');
-              sendYtCmd('setVolume', [100]);
-            }, 350);
-          }
-        });
+        introYtFrame.addEventListener('load', () => setupCleanYtFrame(introYtFrame));
+        showcaseYtFrame.addEventListener('load', () => setupCleanYtFrame(showcaseYtFrame));
 
         function startDrakeNodeCycle() {
           if (state.drakeTimer) clearInterval(state.drakeTimer);
