@@ -3834,7 +3834,7 @@ Uhm6FQAAAAA=
 
         const VIDEO_CONFIG = {
           introYoutubeSrc: 'https://www.youtube.com/embed/2w-2RuihBls?si=cgXyBmySeAxoDo_l&autoplay=1&rel=0&playsinline=1&enablejsapi=1',
-          showcaseYoutubeSrc: 'https://www.youtube.com/embed/gocMcpU0A3M?si=PEpid4COlhRESl-l&autoplay=1&mute=1&loop=1&playlist=gocMcpU0A3M&playsinline=1&rel=0'
+          showcaseYoutubeSrc: 'https://www.youtube.com/embed/gocMcpU0A3M?si=PEpid4COlhRESl-l&autoplay=1&loop=1&playlist=gocMcpU0A3M&playsinline=1&rel=0&enablejsapi=1'
         };
 
         const TOTAL_SLIDES = 8;
@@ -4146,6 +4146,26 @@ Uhm6FQAAAAA=
                 '*'
               );
             } catch (_) {}
+          }
+        });
+
+        showcaseYtFrame.addEventListener('load', () => {
+          if (showcaseYtFrame.src) {
+            const sendYtCmd = (func, args = []) => {
+              try {
+                showcaseYtFrame.contentWindow.postMessage(
+                  JSON.stringify({ event: 'command', func, args }),
+                  '*'
+                );
+              } catch (_) {}
+            };
+            sendYtCmd('unMute');
+            sendYtCmd('setVolume', [100]);
+            sendYtCmd('playVideo');
+            setTimeout(() => {
+              sendYtCmd('unMute');
+              sendYtCmd('setVolume', [100]);
+            }, 350);
           }
         });
 
